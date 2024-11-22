@@ -191,17 +191,17 @@ class HAGENSupervisor:
                 optimizer.zero_grad()
                 x, y = self._prepare_data(x, y)
 
-                start_time_batch = time.time()
                 output, adj_mx = self.hagen_model(x, y, batches_seen)
-                end_time_batch = time.time()
 
                 if batches_seen == 0:
                     optimizer = torch.optim.Adam(
                         self.hagen_model.parameters(), lr=base_lr, eps=epsilon)
 
+                # start_time_batch = time.time()
                 loss, l1, l2 = self._compute_loss(
                     y, output, 'train', adj_mx, self._lmd)
 
+                # end_time_batch = time.time()
                 self._logger.debug(loss.item())
                 losses.append(loss.item())
                 l1s.append(l1.item())
@@ -212,8 +212,8 @@ class HAGENSupervisor:
                     self.hagen_model.parameters(), self.max_grad_norm)
                 optimizer.step()
 
-                print(
-                    'Batch {} training time: {:.1f}s'.format(batches_seen, end_time_batch - start_time_batch))
+                # print(
+#                       'Batch {} training time: {:.1f}s'.format(batches_seen, end_time_batch - start_time_batch))
 
             lr_scheduler.step()
             val_loss, update, valCE, valHR, valmacro, valmicro = self.evaluate(
@@ -278,12 +278,16 @@ class HAGENSupervisor:
         loss_seq = cross_entropy(y_predicted, y_true)
         if (loss_type == 'train'):
             loss_hr = 0.0
+            start_time = time.time()
             y_true = y_true.squeeze(0)
             y_predicted = y_predicted.squeeze(0)
             for y in y_true:
                 y = y.reshape([self.num_nodes, self.output_dim])
                 loss_hr += cal_hr_loss(y, adj_mx, self.input_dim)
             loss = 1 * loss_seq + beta * loss_hr
+            end_time = time.time()
+            print('CE time: ', end_time - start_time)
+            print(y_true.device)
         else:
             loss = loss_seq
             loss_hr = 0.0
