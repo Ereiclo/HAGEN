@@ -1,0 +1,4 @@
+2024-11-22 15:59:09,355 - model.hagen_supervisor - INFO - Log directory: ./logs/9/ds2_rl2_gs50_alpha3_pa15_1122155909
+2024-11-22 15:59:09,684 - model.hagen_supervisor - INFO - Model created
+2024-11-22 15:59:10,450 - model.hagen_supervisor - INFO - Start training ...
+2024-11-22 15:59:10,450 - model.hagen_supervisor - INFO - num_batches:12

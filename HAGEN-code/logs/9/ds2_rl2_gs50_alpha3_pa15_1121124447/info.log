@@ -1,0 +1,9 @@
+2024-11-21 12:44:47,764 - model.hagen_supervisor - INFO - Log directory: ./logs/9/ds2_rl2_gs50_alpha3_pa15_1121124447
+2024-11-21 12:44:47,793 - model.hagen_supervisor - INFO - Model created
+2024-11-21 12:44:48,360 - model.hagen_supervisor - INFO - Start training ...
+2024-11-21 12:44:48,361 - model.hagen_supervisor - INFO - num_batches:12
+2024-11-21 12:44:48,515 - model.hagen_supervisor - INFO - Total trainable parameters 463296
+2024-11-21 12:44:57,714 - model.hagen_supervisor - INFO - val: The average macro-F1 score is 0.51976, average micro-F1 score is 0.58646
+2024-11-21 12:44:57,714 - model.hagen_supervisor - INFO - Epoch [0/100] (12) train_loss: 0.7308, (0.5423 / 18.8517) val_loss: 0.6786, (0.4974 / 18.1190) lr: 0.010000, 9.4s
+2024-11-21 12:44:58,289 - model.hagen_supervisor - INFO - test: The average macro-F1 score is 0.53153, average micro-F1 score is 0.59738
+2024-11-21 12:44:58,292 - model.hagen_supervisor - INFO - Val F1 increase from 0.0000 to 0.5464, saving to ./logs/9/ds2_rl2_gs50_alpha3_pa15_1121124447/model.tar

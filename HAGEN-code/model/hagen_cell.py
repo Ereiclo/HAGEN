@@ -1,9 +1,10 @@
 import numpy as np
 import torch
 from lib import utils
+import time
 
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = "cpu"
+device = utils.device
+
 
 class LayerParams:
     def __init__(self, rnn_network: torch.nn.Module, layer_type: str):
@@ -30,7 +31,7 @@ class LayerParams:
                                                  biases)
 
         return self._biases_dict[length]
-    
+
     def get_weights_sup(self, length, bias_start=1.0):
         if length not in self._biases_dict:
             biases = torch.nn.Parameter(torch.empty(length, device=device))
@@ -40,6 +41,7 @@ class LayerParams:
                                                  biases)
 
         return self._biases_dict[length]
+
 
 class DCGRUCell(torch.nn.Module):
     def __init__(self, num_units, max_diffusion_step, num_nodes, nonlinearity='tanh',
@@ -63,9 +65,11 @@ class DCGRUCell(torch.nn.Module):
             fn = self._gconv
         else:
             fn = self._fc
-        value = torch.sigmoid(fn(inputs, hx, output_size, adj_mx, bias_start=1.0)[0])
+        value = torch.sigmoid(
+            fn(inputs, hx, output_size, adj_mx, bias_start=1.0)[0])
         value = torch.reshape(value, (-1, self._num_nodes, output_size))
-        r, u = torch.split(tensor=value, split_size_or_sections=self._num_units, dim=-1)
+        r, u = torch.split(
+            tensor=value, split_size_or_sections=self._num_units, dim=-1)
         r = torch.reshape(r, (-1, self._num_nodes * self._num_units))
         u = torch.reshape(u, (-1, self._num_nodes * self._num_units))
         c, dw = self._gconv(inputs, r * hx, self._num_units, adj_mx)
@@ -99,10 +103,12 @@ class DCGRUCell(torch.nn.Module):
 
         x = inputs_and_state
         x0 = x.permute(1, 2, 0)
-        x0 = torch.reshape(x0, shape=[self._num_nodes, input_size * batch_size])
+        x0 = torch.reshape(
+            x0, shape=[self._num_nodes, input_size * batch_size])
         x = torch.unsqueeze(x0, 0)
 
         supports = []
+
         supports.append(utils.calculate_random_walk_matrix(adj_mx).T)
         supports.append(utils.calculate_reverse_random_walk_matrix(adj_mx).T)
 
@@ -116,15 +122,19 @@ class DCGRUCell(torch.nn.Module):
                     x2 = 2 * torch.mm(support, x1) - x0
                     x = self._concat(x, x2)
                     x1, x0 = x2, x1
-                weights_sup = self._gconv_params.get_weights_sup(self._num_nodes, bias_start=1.0)
+                weights_sup = self._gconv_params.get_weights_sup(
+                    self._num_nodes, bias_start=1.0)
                 x0 = torch.matmul(torch.diag(weights_sup), x0)
 
-        num_matrices = len(supports) * self._max_diffusion_step + 1  
-        x = torch.reshape(x, shape=[num_matrices, self._num_nodes, input_size, batch_size])
-        x = x.permute(3, 1, 2, 0) 
-        x = torch.reshape(x, shape=[batch_size * self._num_nodes, input_size * num_matrices])
-        weights = self._gconv_params.get_weights((input_size * num_matrices, output_size))
-        x = torch.matmul(x, weights) 
+        num_matrices = len(supports) * self._max_diffusion_step + 1
+        x = torch.reshape(
+            x, shape=[num_matrices, self._num_nodes, input_size, batch_size])
+        x = x.permute(3, 1, 2, 0)
+        x = torch.reshape(
+            x, shape=[batch_size * self._num_nodes, input_size * num_matrices])
+        weights = self._gconv_params.get_weights(
+            (input_size * num_matrices, output_size))
+        x = torch.matmul(x, weights)
         biases = self._gconv_params.get_biases(output_size, bias_start)
         x += biases
-        return torch.reshape(x, [batch_size, self._num_nodes * output_size]), weights_sup.detach().numpy()
+        return torch.reshape(x, [batch_size, self._num_nodes * output_size]), weights_sup.detach().cpu().numpy()

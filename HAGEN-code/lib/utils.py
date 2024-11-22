@@ -5,6 +5,9 @@ import pickle
 import sys
 import torch
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = "cpu"
+
 
 class DataLoader(object):
     def __init__(self, xs, ys, batch_size, pad_with_last_sample=True, shuffle=False):
@@ -26,10 +29,12 @@ class DataLoader(object):
 
     def get_iterator(self):
         self.current_ind = 0
+
         def _wrapper():
             while self.current_ind < self.num_batch:
                 start_ind = self.batch_size * self.current_ind
-                end_ind = min(self.size, self.batch_size * (self.current_ind + 1))
+                end_ind = min(self.size, self.batch_size *
+                              (self.current_ind + 1))
                 x_i = self.xs[start_ind: end_ind, ...]
                 y_i = self.ys[start_ind: end_ind, ...]
                 yield (x_i, y_i)
@@ -60,7 +65,7 @@ def calculate_random_walk_matrix(adj_mx):
 
 
 def calculate_reverse_random_walk_matrix(adj_mx):
-    adj_mx_np = adj_mx.detach().numpy()
+    adj_mx_np = adj_mx.detach().cpu().numpy()
     adj_r = adj_mx_np.transpose()
     adj_rev = torch.from_numpy(adj_r)
     adj_rev = adj_rev.to(torch.float32)
@@ -70,11 +75,12 @@ def calculate_reverse_random_walk_matrix(adj_mx):
     d_inv_new = torch.where(d_inv_inf_mask, torch.full_like(d_inv, 0), d_inv)
     d_mat_inv = torch.diag(d_inv_new)
     random_walk_mx_rev = torch.mm(d_mat_inv, adj_rev)
-    return random_walk_mx_rev
+    return random_walk_mx_rev.to(device=adj_mx.device)
 
 
 def config_logging(log_dir, log_filename='info.log', level=logging.INFO):
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     try:
         os.makedirs(log_dir)
     except OSError:
@@ -82,7 +88,8 @@ def config_logging(log_dir, log_filename='info.log', level=logging.INFO):
     file_handler = logging.FileHandler(os.path.join(log_dir, log_filename))
     file_handler.setFormatter(formatter)
     file_handler.setLevel(level=level)
-    console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    console_formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s')
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(console_formatter)
     console_handler.setLevel(level=level)
@@ -92,10 +99,12 @@ def config_logging(log_dir, log_filename='info.log', level=logging.INFO):
 def get_logger(log_dir, name, log_filename='info.log', level=logging.INFO):
     logger = logging.getLogger(name)
     logger.setLevel(level)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     file_handler = logging.FileHandler(os.path.join(log_dir, log_filename))
     file_handler.setFormatter(formatter)
-    console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    console_formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s')
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(console_formatter)
     logger.addHandler(file_handler)
@@ -111,17 +120,22 @@ def load_dataset(dataset_dir, batch_size, test_batch_size=None, **kwargs):
         if 'Type' in kwargs:
             Type = kwargs['Type']
             data['x_' + category] = cat_data['x']
-            data['y_' + category] = cat_data['y'][:,:,:,Type][:,:,:,np.newaxis]
-        else:  
+            data['y_' + category] = cat_data['y'][:,
+                                                  :, :, Type][:, :, :, np.newaxis]
+        else:
             data['x_' + category] = cat_data['x']
             data['y_' + category] = cat_data['y']
-    scaler = StandardScaler(mean=data['x_train'][..., 0].mean(), std=data['x_train'][..., 0].std())
-    data['train_loader'] = DataLoader(data['x_train'], data['y_train'], batch_size, shuffle=True)
-    data['val_loader'] = DataLoader(data['x_val'], data['y_val'], test_batch_size, shuffle=False)
-    data['test_loader'] = DataLoader(data['x_test'], data['y_test'], test_batch_size, shuffle=False)
+    scaler = StandardScaler(
+        mean=data['x_train'][..., 0].mean(), std=data['x_train'][..., 0].std())
+    data['train_loader'] = DataLoader(
+        data['x_train'], data['y_train'], batch_size, shuffle=True)
+    data['val_loader'] = DataLoader(
+        data['x_val'], data['y_val'], test_batch_size, shuffle=False)
+    data['test_loader'] = DataLoader(
+        data['x_test'], data['y_test'], test_batch_size, shuffle=False)
     data['scaler'] = scaler
     return data
-    
+
 
 def load_graph_data(pkl_filename):
     sensor_ids, sensor_id_to_ind, adj_mx = load_pickle(pkl_filename)

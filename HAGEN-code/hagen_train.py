@@ -23,6 +23,6 @@ if __name__ == '__main__':
     parser.add_argument('--config_filename', default="./crime-data/CRIME-LA/la_crime_9.yaml", type=str,
                         help='Configuration filename for restoring the model.')
     parser.add_argument('--month', default='9', type=str, help='month')
-    parser.add_argument('--use_cpu_only', default=True, type=bool, help='Set to true to only use cpu.')
+    parser.add_argument('--use_cpu_only', default=False, type=bool, help='Set to true to only use cpu.')
     args = parser.parse_args()
     main(args)

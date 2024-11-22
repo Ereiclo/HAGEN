@@ -6,4 +6,5 @@ statsmodels
 torch
 tables
 future
-sklearn
+scikit-learn
+tensorboard
