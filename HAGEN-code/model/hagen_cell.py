@@ -20,6 +20,7 @@ class LayerParams:
             self._params_dict[shape] = nn_param
             self._rnn_network.register_parameter('{}_weight_{}'.format(self._type, str(shape)),
                                                  nn_param)
+            # print("shape", shape)
         return self._params_dict[shape]
 
     def get_biases(self, length, bias_start=0.0):
@@ -60,6 +61,8 @@ class DCGRUCell(torch.nn.Module):
         self.direction_weight = torch.nn.Linear(num_nodes, num_nodes)
 
     def forward(self, inputs, hx, adj_mx):
+        print("inputs", inputs.shape)
+        print("units", self._num_units)
         output_size = 2 * self._num_units
         if self._use_gc_for_ru:
             fn = self._gconv
@@ -76,6 +79,7 @@ class DCGRUCell(torch.nn.Module):
         if self._activation is not None:
             c = self._activation(c)
         new_state = u * hx + (1.0 - u) * c
+        print("new_state", new_state.shape)
         return new_state, dw
 
     def _concat(self, x, x_):

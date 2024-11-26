@@ -70,15 +70,23 @@ class DecoderModel(nn.Module, Seq2SeqAttrs):
                 output, hidden_state[layer_num], adj_mx)
             hidden_states.append(next_hidden_state)
             output = next_hidden_state
+        print("output", output.shape)
         batch_size = output.size(0)
         output = output.reshape(batch_size*self.num_nodes, -1)
         dim_poi = POI_feat.size(1)
         poi_ex = POI_feat.expand(batch_size, self.num_nodes, dim_poi)
+        print("poi_ex", poi_ex.shape)
         poi_re = poi_ex.reshape(batch_size * self.num_nodes, -1).to(device)
+        print("poi_re", poi_re.shape)
+        print("output", output.shape)
         output_cat = torch.cat([output, poi_re], dim=1)
+        output_cat2 = output_cat.view(-1, (self.rnn_units + dim_poi))
+        print("output_cat2", output_cat2.shape)
         projected = self.projection_layer(
-            output_cat.view(-1, (self.rnn_units + dim_poi)))
+            output_cat2
+        )
         output = projected.view(-1, self.num_nodes * self.output_dim)
+        print("output 2", output.shape)
         return output, torch.stack(hidden_states)
 
 
@@ -189,6 +197,8 @@ class HAGENModel(nn.Module, Seq2SeqAttrs):
         for t in range(self.encoder_model.seq_len):
             _, encoder_hidden_state = self.encoder_model(
                 inputs[t], adj_mx, nodevec1, nodevec2, encoder_hidden_state)
+        print("encoder_hidden_state", encoder_hidden_state.shape)
+        print("n layers", self.encoder_model.num_rnn_layers)
         return encoder_hidden_state
 
     def decoder(self, encoder_hidden_state, adj_mx, nodevec1, nodevec2, POI_feat, labels=None, batches_seen=None):
@@ -211,6 +221,7 @@ class HAGENModel(nn.Module, Seq2SeqAttrs):
         return outputs
 
     def forward(self, inputs, labels=None, batches_seen=None):
+        print("initial inputs", inputs.shape)
         if self.gl:
             adj_mx, nodevec1, nodevec2 = self.gc(self.idx)
         crime_vector = self.emb_crime(self.cidx)
@@ -225,24 +236,34 @@ class HAGENModel(nn.Module, Seq2SeqAttrs):
         batch_size = int(inputs.size(1))
         num_category = 8
         num_sensor = self.num_nodes
+        print("num_sensor", num_sensor)
+        print("adj_mx", adj_mx.shape)
         weighted_inputs = torch.zeros(
             [seq_len*batch_size, num_sensor, num_category]).to(device)
+        print("weighted_inputs", weighted_inputs.shape)
         inputs = inputs.reshape(-1, num_category*num_sensor)
+        print("inputs 1", inputs.shape)
         inputs = inputs.reshape(-1, num_sensor, num_category)
+        print("inputs 2", inputs.shape)
+
         i = 0
         for mat in inputs:
             weighted_inputs[i, :, :] = torch.mul(weight_mx, mat)
             i += 1
         weighted_inputs = weighted_inputs.reshape(seq_len, batch_size, -1)
         weighted_inputs = F.sigmoid(weighted_inputs)
+        print("weighted_inputs original", weighted_inputs.shape)
 
         encoder_hidden_state = self.encoder(
             weighted_inputs, adj_mx, nodevec1, nodevec2)
+
+        print("poi_feat", self.poi_feat.shape)
         self._logger.debug("Encoder complete, starting decoder")
 
         POI_feat = self.poi_feat
         outputs = self.decoder(encoder_hidden_state, adj_mx, nodevec1,
                                nodevec2, POI_feat, labels, batches_seen=batches_seen)
+        print("outputs 4", outputs.shape )
 
         self._logger.debug("Decoder complete")
         if batches_seen == 0:

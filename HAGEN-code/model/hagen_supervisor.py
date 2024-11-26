@@ -193,27 +193,31 @@ class HAGENSupervisor:
 
                 output, adj_mx = self.hagen_model(x, y, batches_seen)
 
+                print('output 3',output.shape)
+
                 if batches_seen == 0:
                     optimizer = torch.optim.Adam(
                         self.hagen_model.parameters(), lr=base_lr, eps=epsilon)
 
-                # start_time_batch = time.time()
+                start_time_batch = time.time()
                 loss, l1, l2 = self._compute_loss(
                     y, output, 'train', adj_mx, self._lmd)
 
-                # end_time_batch = time.time()
+                end_time_batch = time.time()
                 self._logger.debug(loss.item())
                 losses.append(loss.item())
                 l1s.append(l1.item())
-                l2s.append(l2.item())
+                # l2s.append(l2.item())
                 batches_seen += 1
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(
                     self.hagen_model.parameters(), self.max_grad_norm)
                 optimizer.step()
 
-                # print(
-#                       'Batch {} training time: {:.1f}s'.format(batches_seen, end_time_batch - start_time_batch))
+                print(
+                    'Batch {} training time: {:.1f}s'.format(batches_seen, end_time_batch - start_time_batch))
+
+                return
 
             lr_scheduler.step()
             val_loss, update, valCE, valHR, valmacro, valmicro = self.evaluate(
@@ -275,20 +279,42 @@ class HAGENSupervisor:
         return x, y
 
     def _compute_loss(self, y_true, y_predicted, loss_type='train', adj_mx=None, beta=0.01):
+        print(y_true.shape)
+        print(y_predicted.shape)
+        print(y_true[0,0,:113])
         loss_seq = cross_entropy(y_predicted, y_true)
         if (loss_type == 'train'):
+            loss = loss_seq
             loss_hr = 0.0
-            start_time = time.time()
-            y_true = y_true.squeeze(0)
-            y_predicted = y_predicted.squeeze(0)
-            for y in y_true:
-                y = y.reshape([self.num_nodes, self.output_dim])
-                loss_hr += cal_hr_loss(y, adj_mx, self.input_dim)
-            loss = 1 * loss_seq + beta * loss_hr
-            end_time = time.time()
-            print('CE time: ', end_time - start_time)
-            print(y_true.device)
+            pass
+            # loss_hr = 0.0
+
+            # y_true = y_true.cpu()
+            # y_predicted = y_predicted.cpu()
+            # adj_mx = adj_mx.cpu()
+
+
+            # y_true = y_true.squeeze(0)
+            # print(y_true.shape)
+            # y_predicted = y_predicted.squeeze(0)
+            # print(y_predicted.shape)
+
+
+            # for y in y_true:
+
+            #     y = y.reshape([self.num_nodes, self.output_dim])
+            #     loss_hr += cal_hr_loss(y, adj_mx, self.input_dim)
+
+            # loss = 1 * loss_seq + beta * loss_hr
+            # # print(y_true[0])
+            # # print(y_predicted.shape)
+            # # print(adj_mx.shape)
+
+            # # print(y_true.device)
+            # # print(y_predicted.device)
+            # # print(adj_mx.device)
         else:
             loss = loss_seq
             loss_hr = 0.0
         return loss, loss_seq, loss_hr
+

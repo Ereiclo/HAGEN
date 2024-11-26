@@ -1,0 +1,21 @@
+2024-11-22 17:22:20,315 - model.hagen_supervisor - INFO - Log directory: ./logs/9/ds2_rl2_gs50_alpha3_pa15_1122172220
+2024-11-22 17:22:20,456 - model.hagen_supervisor - INFO - Model created
+2024-11-22 17:22:21,012 - model.hagen_supervisor - INFO - Start training ...
+2024-11-22 17:22:21,012 - model.hagen_supervisor - INFO - num_batches:12
+2024-11-22 17:22:21,247 - model.hagen_supervisor - INFO - Total trainable parameters 463296
+2024-11-22 17:22:28,341 - model.hagen_supervisor - INFO - val: The average macro-F1 score is 0.51903, average micro-F1 score is 0.58198
+2024-11-22 17:22:28,341 - model.hagen_supervisor - INFO - Epoch [0/100] (12) train_loss: 0.7402, (0.5507 / 18.9517) val_loss: 0.6811, (0.4997 / 18.1423) lr: 0.010000, 7.3s
+2024-11-22 17:22:28,787 - model.hagen_supervisor - INFO - test: The average macro-F1 score is 0.52147, average micro-F1 score is 0.58524
+2024-11-22 17:22:28,792 - model.hagen_supervisor - INFO - Val F1 increase from 0.0000 to 0.5442, saving to ./logs/9/ds2_rl2_gs50_alpha3_pa15_1122172220/model.tar
+2024-11-22 17:22:36,374 - model.hagen_supervisor - INFO - val: The average macro-F1 score is 0.51880, average micro-F1 score is 0.59424
+2024-11-22 17:22:36,374 - model.hagen_supervisor - INFO - Epoch [1/100] (24) train_loss: 0.6847, (0.4979 / 18.6778) val_loss: 0.6722, (0.4924 / 17.9803) lr: 0.010000, 7.6s
+2024-11-22 17:22:36,889 - model.hagen_supervisor - INFO - test: The average macro-F1 score is 0.52763, average micro-F1 score is 0.60175
+2024-11-22 17:22:36,893 - model.hagen_supervisor - INFO - Val F1 increase from 0.5442 to 0.5490, saving to ./logs/9/ds2_rl2_gs50_alpha3_pa15_1122172220/model.tar
+2024-11-22 17:22:44,518 - model.hagen_supervisor - INFO - val: The average macro-F1 score is 0.52085, average micro-F1 score is 0.59354
+2024-11-22 17:22:44,518 - model.hagen_supervisor - INFO - Epoch [2/100] (36) train_loss: 0.6778, (0.4922 / 18.5655) val_loss: 0.6684, (0.4887 / 17.9653) lr: 0.010000, 7.6s
+2024-11-22 17:22:45,021 - model.hagen_supervisor - INFO - test: The average macro-F1 score is 0.53443, average micro-F1 score is 0.60515
+2024-11-22 17:22:45,026 - model.hagen_supervisor - INFO - Val F1 increase from 0.5490 to 0.5499, saving to ./logs/9/ds2_rl2_gs50_alpha3_pa15_1122172220/model.tar
+2024-11-22 17:22:52,638 - model.hagen_supervisor - INFO - val: The average macro-F1 score is 0.52733, average micro-F1 score is 0.59755
+2024-11-22 17:22:52,639 - model.hagen_supervisor - INFO - Epoch [3/100] (48) train_loss: 0.6748, (0.4896 / 18.5199) val_loss: 0.6655, (0.4864 / 17.9179) lr: 0.010000, 7.6s
+2024-11-22 17:22:53,091 - model.hagen_supervisor - INFO - test: The average macro-F1 score is 0.53498, average micro-F1 score is 0.60523
+2024-11-22 17:22:53,096 - model.hagen_supervisor - INFO - Val F1 increase from 0.5499 to 0.5554, saving to ./logs/9/ds2_rl2_gs50_alpha3_pa15_1122172220/model.tar
